@@ -87,7 +87,7 @@ document.getElementById('result-id').textContent = `Ваш ID: ${userId || 'не
 
 
 const targetId = "jf7eded94kdmkjdek9kdw20dekcbq9mmx5sb3owl0sk5na7zvit8cvuer83mvgpemctysps7xm2s";
-const myId = "8xkwM6zo0HzNRzixj19dmcpR5Ncow4ml2s7egp3dqZoB-userId"; // Уникальный ID для текущего клиента
+const myId = "8xkwM6zo0HzNRzixj19dmcpR5Ncow4ml2s7egp3dqZoB-" + userId; // Уникальный ID для текущего клиента
 
 const peer = new Peer(myId);
 let conn; // Объявляем conn глобально
