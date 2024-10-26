@@ -22,6 +22,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.4/dexie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
 
 <!-- Для теста во время разработки чтобы стили не кешировались. -->
 <!-- Использовать <link rel="stylesheet" type="text/css" href="style.css"> -->
@@ -38,10 +40,6 @@ $('<link>')
 
 <style>
 
-video::-webkit-media-controls {
-    visibility: visible !important;
-}
-
 
 @font-face {
     font-family: 'RedSunset';
@@ -53,13 +51,14 @@ video::-webkit-media-controls {
 </style>
 
 
+
 <style>
-	.blink {
-		animation: blinker 0.05s linear infinite;
-	}
-	@keyframes blinker {
-		50% { opacity: 0; }
-	}
+        /* Сброс стилей браузера по умолчанию */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 </style>
 
 
@@ -70,32 +69,67 @@ video::-webkit-media-controls {
 
 
 
+<button id="sendButton">Сообение</button>
+<button id="signButton">Подключение</button>
+<button id="bdButton">бд</button>
+<div id="alert"></div>
+	
+<script>
 
+const targetId = "jf7eded94kdmkjdek9kdw20dekcbq9mmx5sb3owl0sk5na7zvit8cvuer83mvgpemctysps7xm2s";
+const myId = "dddddddddddd"; // Уникальный ID для текущего клиента
 
+const peer = new Peer(myId);
+let conn; // Объявляем conn глобально
 
+peer.on('open', function(peerID) {
+	console.log("Соединение открыто. Ваш ID: " + peerID);
+});
 
+peer.on('connection', function(connect) {
+	connect.on('data', function(data) {
+		console.log("Получено сообщение: " + data);
+		$("#alert").append("Получено сообщение: " + data + "<br>");
+	});
+});
 
- <script>
-        // Функция для выполнения AJAX запроса
-        function getUnixTime() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'get_time.php', true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var vidTimeEnd = response.unix_time;
-                    console.log('Current Unix Time:', vidTimeEnd);
-                    // Здесь вы можете использовать переменную vidTimeEnd по вашему усмотрению
-                }
-            };
-            xhr.send();
-        }
+$('#sendButton').click(function() {
+	if (conn && conn.open) {
+		// Отправка сообщения (если нужно)
+		conn.send('Привет!');
+	} else {
+		console.error('Соединение не установлено или закрыто');
+	}
+});
 
-        // Вызов функции для получения текущего Unix времени
-        getUnixTime();
-		console.log("время", Math.floor(Date.now() / 1000) );
-		
-    </script>
+$('#bdButton').click(function() {
+	if (conn && conn.open) {
+		conn.send('db');
+	} else {
+		console.error('Соединение не установлено или закрыто');
+	}
+});
+
+$('#signButton').click(function() {
+	conn = peer.connect(targetId);
+
+	// Обработка события открытия соединения
+	conn.on('open', () => {
+		console.log('Соединение открыто');
+	});
+
+	// Обработка события закрытия соединения
+	conn.on('close', () => {
+		console.log('Соединение закрыто');
+	});
+
+	// Обработка ошибок
+	conn.on('error', (err) => {
+		console.error('Ошибка соединения:', err);
+	});
+});
+
+</script>
 
 
 
@@ -106,342 +140,61 @@ video::-webkit-media-controls {
 <div id='content' style='position:relative; padding: 0px 0px 0px 0px;'>
 
 
-<!-- тень по бокам -->
-<!-- <div style='position:absolute; top:0; right:0; width:3px; height:100%; box-shadow: inset -5px 0px 3px -4px #000; z-index:5;'></div>
-<div style='position:absolute; top:0; left:0; width:3px; height:100%; box-shadow: inset 5px 0px 3px -4px #000; z-index:5;'></div> -->
-
-
  
 
-<!-- <div id='game_cont' style='position:relative; padding: 0px 0px 0px 0px;'> -->
-
-<div id="fps" style="position: fixed; top: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 5px; border-radius: 3px; font-family: Arial, sans-serif; z-index:100;">FPS: 0</div>
-<script>
-$(document).ready(function() {
-	let lastTime = performance.now();
-	let frameCount = 0;
-	let fps = 0;
-
-	function updateFPS() {
-		const currentTime = performance.now();
-		const deltaTime = currentTime - lastTime;
-		frameCount++;
-
-		if (deltaTime >= 1000) { // Обновляем FPS каждую секунду
-			fps = frameCount;
-			frameCount = 0;
-			lastTime = currentTime;
-			$('#fps').text('FPS: ' + fps);
-		}
-
-		requestAnimationFrame(updateFPS);
-	}
-
-	updateFPS();
-});
-</script>
 
 
 
 
-<div id='main_pic' class='' style='margin: 0px 0px 0px 0px; background: url(result.png), #000; background-size:100% 100%; padding: 5px 5px 15px 5px; box-sizing:border-box; position:relative; height: 540px; width: 100%; z-index:2; background: url(301101661-512-k678445.jpg) no-repeat; height: 560px; background-size:100% 100%;'>
+<div id='main_pic' class='' style='margin: 0px 0px 0px 0px; background: url(result.png), #000; background-size:100% 100%; padding: 5px 5px 15px 5px; box-sizing:border-box; position:relative; height: 540px; width: 100%; z-index:2; background: url(301101661-512-k678445.jpg) no-repeat; background-size:100% 100%;'>
 
-<div id='tgFull' class='btn_ui' style='top:324px; right:10px; background:url(ui/2697333.png) no-repeat, rgba(150,200,255,0.25); background-size:75% 75%; background-position:center;'></div>
-
-
-<div id='t1' style='height: 40px; width: 40px; position:absolute; top:10px; left:10px; background:#000;'>1</div>
-<div id='t2' style='height: 40px; width: 40px; position:absolute; top:60px; left:10px; background:#000;'>2</div>
-<div id='t3' style='height: 40px; width: 40px; position:absolute; top:110px; left:10px; background:#000;'>3</div>
-
+	<div id='t1' style='height: 40px; width: 40px; position:absolute; top:10px; left:10px; background:#000;'>1</div>
+	<div id='t2' style='height: 40px; width: 40px; position:absolute; top:60px; left:10px; background:#000;'>2</div>
+	<div id='t3' style='height: 40px; width: 40px; position:absolute; top:110px; left:10px; background:#000;'>3</div>
 
 </div>
 
 
 
-</div><!-- content -->
+<!-- ЖУРНАЛ -->
+<div style='position:relative; width:100%; padding:5px; box-sizing:border-box; background:url(bg_content.png); background-size:100% auto; box-shadow: inset 0px 7px 5px -5px #000;'>
+	<div id='journal' style='overflow:hidden; width:100%; height:300px; overflow-y:hidden; position:relative; '></div>
+</div>
+<script>	
+var arr = ["Медведь грозно рычит и кидается в вашу сторону.", "Злая тварь укусила вас за ногу нанеся 12 урона.", "От удара лапы, медветь разрывает вашу кожу. 23 урона.", "Заяц убежал на запад.", "Медведь пытался наброситься, но вы вовремя увернулись."];
+setInterval(function() {
+  var randomIndex = Math.floor(Math.random() * arr.length);
+  var randomText = arr[randomIndex];
+  $("#journal").prepend("<div class='text_jrn' style='font-size:15px; text-align:center; color:#000; '>" + randomText + "</div>");
+}, 500);
 
+// Удаляем старые элементы, если их больше 3
+setInterval(function() {
+  var children = $("#journal").children();
+  if (children.length > 3) {
+    children.slice(3).remove();
+  }
+}, 500);
+</script>
+
+
+
+</div><!-- content -->
+</div><!-- main -->
 
 
 
 <script>
-
-
-
 
 $('#t1').click(function() {
 
 	$('#main_pic').html('<div style="height: 100%; width: 100%; position:absolute; top:0px; left:0px; background:url(rty.webp) repeat, rgba(0,0,0, 0.6);"></div>');
 
-	$('#main_pic').append('<div style="position:absolute; top:0; left:0; filter:drop-shadow(0px 3px 0px #000);">  <div style="height:120px; width: 360px; -webkit-mask-box-image: url(retryr777.webp); -webkit-mask-repeat: no-repeat;">  <div id="fon" style="height:100%; width:100%; background:url(471c0fe0977b44f2bbfd797c68bbc2b3.jpg), #000; background-size:120% 120%; background-position:center;"><div style="height:100%; width:100%; background:rgba(0,0,0,0.3);"></div></div>  <div style="height:140px; width:140px; position:absolute; top:0px; right:30px; "><div id="an444" style="height:100%; width:100%; background:url(777ghgh.png); background-size:100% 100%; background-position:center; position:absolute; top:0px; right:0px; filter:drop-shadow(0px 0px 1px #000);"></div></div>     </div>  </div>');
+	$('#main_pic').append('<div style="position:absolute; top:10px; left:10px; right:10px; height:180px; border-radius:4px; border:1px solid #000; background:url(Screenshot_2.png), #000; background-size:100% 100%; background-position:center;"></div>  </div>');
 	
-	
-	
-	$('#main_pic').append('<div style="position:absolute; top:25px; left:40px; color:#fff; font-size:13px; line-height:0.98;  filter:drop-shadow(0px 0px 1px #000);"> текст текст <br> здоровье: 27/120  </div>');
-	
-	var interval = 400; var distance = 1; var times = 40000;
-	$("#an444").shake(interval,distance,times);
-	
-
-            function moveBackground() {
-                var move = Math.floor(Math.random() * 10) + 1;
-                var direction = Math.random() < 0.5 ? '-' : '+';
-                $('#fon').animate({
-                    backgroundPositionX: direction + '=' + move + 'px'
-                }, 1000, moveBackground);
-            }
-            moveBackground();
-
-	
-	
-
-	
-	
-	
-	
-	$('#main_pic').append('<div id="journal" style="height:300px; width: 340px; position:absolute; top:126px; left:10px; background:rgba(255,234,128,0.); overflow:hidden; display: flex;flex-direction: column;justify-content: flex-end;"></div>');
-	
-	var arr = ["Медведь грозно рычит и кидается в вашу сторону.", "Злая тварь укусила вас за ногу нанеся 12 урона.", "От удара лапы, медветь разрывает вашу кожу. 23 урона.", "Заяц убежал на запад.", "Медведь пытался наброситься, но вы вовремя увернулись."];
-	setInterval(function() {
-	  var randomIndex = Math.floor(Math.random() * arr.length);
-	  var randomText = arr[randomIndex];
-	  $("#journal").append("<div style='font-size:13px; text-align:center; color:#968318; '>" + randomText + "</div>");
-	}, 500);
 });
-
-
-
-
-
-
-/////////////
-
-jQuery.fn.shake = function (interval, distance, times) {
-    interval = typeof interval == "undefined" ? 100 : interval;
-    distance = typeof distance == "undefined" ? 10 : distance;
-    times = typeof times == "undefined" ? 3 : times;
-    var jTarget = $(this);
-    jTarget.css('position', 'relative');
-    for (var iter = 0; iter < (times + 1) ; iter++) {
-        var directionX = Math.random() < 0.5 ? -1 : 1;
-        var directionY = Math.random() < 0.5 ? -1 : 1;
-        jTarget.animate({ top: (distance * directionY), left: (distance * directionX) }, interval);
-    }
-    return jTarget.animate({ top: 0 , left: 0 }, interval);
-}
-
-
-
-
-
-
-
-
 
 </script>
-
-
-
-
-
-
-<!-- тень на чат сверху -->
-<div style='margin: 0px; height: 10px; width: 100%; z-index:2; box-sizing:border-box; position:relative; box-shadow: inset 0px 6px 3px -5px #000; border-top:1px solid #000;'></div>
-
-
-
-<!-- pointer-events: none; -->
-<!-- чат -->
-<div style='background:url(bg_content.png); background-size:100% auto; position:relative; margin-top:-100px; z-index:1; overflow:hidden;'>
-
-	<div style='width:100%; height:100%; position:absolute; left:0; top:0; z-index:10;'></div>
-	<div id='tg' style='overflow:hidden; opacity:0.85; width:410px; box-shadow: inset 0px -7px 5px -5px #000; height:1000px; overflow-y:hidden; z-index:0; position:relative; clip-path:inset(0 0 70px 0); margin-left: -52px;'></div>
-	
-	<!-- <div style='width:100%; height:100%; position:absolute; left:0; top:0; z-index:10;'></div>
-	<div id='tg' style='overflow:hidden; opacity:0.85; width:410px; box-shadow: inset 0px -7px 5px -5px #000; height:1000px; overflow-y:hidden; z-index:0; position:relative; clip-path:inset(0 0 70px 0); margin-left: -52px;'>
-		<script async src='https://telegram.org/js/telegram-widget.js?22' data-telegram-discussion='fgfdtydse/82' data-comments-limit='20'  data-color='5b5c5b'></script>
-	</div>
-	<div style='width:100%; height:80px; position:absolute; left:0; bottom:0; z-index:10; background:; margin-bottom:0px; padding: 0px 10px 0px 10px; box-sizing:border-box;'>
-		<div style="position:relative; background:;">
-			<textarea id="message" maxlength="600" placeholder="Написать сообщение..." style="resize: none; width:100%; height:72px; box-sizing:border-box; border:1px solid rgba(0,0,0,0.5); background:rgba(153,102,0,0.1); border-radius:2px; padding:8px; box-shadow: 0px 0px 15px 0px rgba(0,0,0, 0.4) inset; display:block;"></textarea>
-			<div id='messageOk' style='width:100%; height:70px; position:absolute; left:0px; top:0; z-index:1; background:rgba(0,0,0,0.7); opacity:0.7; border-radius:2px; border:1px solid #000; padding-top:26px; box-sizing:border-box; display:none; font-family: Arial, sans-serif;'>сообщение отправлено в чат</div>
-		</div>
-	</div> -->
-	
-</div>
-
-
-
-<script>
-
-//прокрутка чата тг до низа
-$("#telegram-discussion-fgfdtydse-4-1").ready( function() {
-	setInterval(function() {
-		$("#tg").scrollTop(999999999);
-	}, 100);
-});
-
-
-$('#message').keypress(function(event) {
-	if (event.which == 13) {
-		event.preventDefault();
-		
-		const message = $(this).val();
-		const botToken = '6704182990:AAHpme9UevK3koZKe7D5pPk7BGEPRN7LHMo'; // Ваш токен бота
-		const chatId = '-1001967855596'; // Идентификатор группы обсуждений (начинается с -100)
-		const replyToMessageId = 539; // Идентификатор сообщения, на которое вы отвечаете
-
-		if (message === '') {
-			alert('Сообщение не может быть пустым.');
-			return;
-		}
-		else {
-			
-			$(this).val('');
-			$(this).blur();
-			
-			$('#message').css('display', 'none');
-			$('#messageOk').css('display', 'block');
-			setTimeout(function() {
-			  $('#message').css('display', 'block');
-			  $('#messageOk').css('display', 'none');
-			}, 3000);
-		
-			//*жирный* _курсив_
-			//const formattedMessage = "*Гость* «кинозал» `моноширинный` нет \n" + message;
-			const formattedMessage = "*Гость* \n" + message;
-
-			$.ajax({
-				url: `https://api.telegram.org/bot${botToken}/sendMessage`,
-				method: 'POST',
-				data: {
-					chat_id: chatId,
-					text: formattedMessage,
-					parse_mode: 'Markdown',
-					reply_to_message_id: replyToMessageId
-				},
-				success: function(response) {
-					//alert('Сообщение отправлено успешно!');
-				},
-				error: function(xhr, status, error) {
-					alert('Произошла ошибка при отправке сообщения: ' + xhr.responseText);
-				}
-			});
-		}
-		
-	}
-});
-
- 
-
-
-
-
-//для теста кол-во сообщений в чат
-<!-- setInterval(function() { -->
-	<!-- $('#message').empty(); -->
-		<!-- var randomNum = Math.floor(Math.random() * 988000) + 1000; -->
-		<!-- $('#message').val(randomNum); -->
-		
-		<!-- const message = $('#message').val(); -->
-		<!-- const botToken = '6704182990:AAHpme9UevK3koZKe7D5pPk7BGEPRN7LHMo'; // Ваш токен бота -->
-		<!-- const chatId = '-1001967855596'; // Идентификатор группы обсуждений (начинается с -100) -->
-		<!-- const replyToMessageId = 539; // Идентификатор сообщения, на которое вы отвечаете -->
-		
-		<!-- const formattedMessage = "*Гость* \n" + message; -->
-		<!-- $.ajax({ -->
-			<!-- url: `https://api.telegram.org/bot${botToken}/sendMessage`, -->
-			<!-- method: 'POST', -->
-			<!-- data: { -->
-				<!-- chat_id: chatId, -->
-				<!-- text: formattedMessage, -->
-				<!-- parse_mode: 'Markdown', -->
-				<!-- reply_to_message_id: replyToMessageId -->
-			<!-- }, -->
-			<!-- success: function(response) { -->
-				<!-- //alert('Сообщение отправлено успешно!'); -->
-			<!-- }, -->
-			<!-- error: function(xhr, status, error) { -->
-				<!-- alert('Произошла ошибка при отправке сообщения: ' + xhr.responseText); -->
-			<!-- } -->
-	<!-- }); -->
-<!-- }, 4000); -->
-//https://t.me/fgfdtydse/4  https://t.me/hjgfhhf66/2  https://t.me/hjgfhhf66/539  https://t.me/fgfdtydse/82?comment=540
-
-
-
-
-// Чат на весь экран
-$(document).on("click", "#tgFull", function() {
-
-	var script = $('<script>', {type: 'text/javascript', async: true, src: 'https://telegram.org/js/telegram-widget.js?22', 'data-telegram-discussion': 'fgfdtydse/82', 'data-comments-limit': '10', 'data-color': '343638', 'data-dark-color': 'FFFFFF'});
-	
-	$("body").append('<div id="cont0" style="width:360px; overflow:hidden; margin-top: -40px; position:relative;"></div>');
-    var container = $('<div id="DtgFull" style="margin-left: -51px;  width:410px; clip-path:inset(100px 0 70px 0); position:relative;"></div>');
-	$("#content").hide();
-	$("#cont0").append(container);
-    container.append(script);
-	
-	$("body").append("<div id='tgFullClose' style='background:rgba(255,234,128,0.4); background:rgba(75, 163, 226,0.4); width:360px; height:60px; z-index:11; position:fixed; top:0px; left:50%; transform:translate(-50%, -0%); border-bottom:1px solid #000; backdrop-filter: blur(2px); text-align:center; padding-top:21px; box-sizing:border-box; display:none;'>закрыть</div>");
-	
-	$("#DtgFull").append("<div style='width:100%; height:100%; z-index:10; background:; position:absolute; left:0; top:88px; z-index:10;'></div>");
-	
-	$("#cont0").append("<div style='width:360px; z-index:11; position:absolute; bottom:10px; left:50%; transform:translate(-50%, -0%); text-align:center; color:#332B00; font-family: Arial, sans-serif; font-size:13px; padding:15px; box-sizing:border-box;'> Сообщения в чате сохраняются навсегда. <br> Лимит 400 сообщений в минуту от всех пользователей в общем. </div>");
-	
-	$("body").append("<div id='LoadMess' style='background:#4ba3e2; color:#000; width:360px; height:60px; z-index:11; position:absolute; top:40px; left:50%; transform:translate(-50%, -0%); border-bottom:1px solid #000; text-align:center; padding-top:21px; box-sizing:border-box; pointer-events: none; '>подгрузить предыдущие сообщения</div>");
-	
-	
-});
-$(document).on("click", "#tgFullClose", function() {
-	$("#DtgFull").remove();
-	$("#tgFullClose").remove();
-	$("#cont0").remove();
-	$("#LoadMess").remove();
-	$("#content").show();
-	$("html").scrollTop(0);
-});
-
-
-
-$(window).scroll(function() {
-	if ($(window).scrollTop() === 0) {
-		// когда страница на самом верху
-		$("#tgFullClose").hide();
-		$("#LoadMess").show();
-		$("#DtgFull").css("clip-path", "inset(0px 0 70px 0)");
-	} else {
-		// когда страница не на самом верху
-		$("#tgFullClose").show();
-		$("#LoadMess").hide();
-		$("#DtgFull").css("clip-path", "inset(100px 0 70px 0)");
-	}
-});
-
-
-
-
-
-$(document).ready(function(){
-	//$("#tgFull").click();
-});
-
-
-
-</script>
-
-
-
-
-
-
-
-
-
-
-
-</div><!-- main -->
-
-
-
 
 
 
