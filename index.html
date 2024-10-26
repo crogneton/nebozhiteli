@@ -74,8 +74,23 @@ $('<link>')
 <button id="signButton">Подключение</button>
 <button id="bdButton">бд</button>
 <div id="alert"></div>
+<div id="result-id"></div>
 	
 <script>
+
+
+
+
+const currentUrl = window.location.href;
+const userId = new URL(currentUrl).searchParams.get('id');
+document.getElementById('result-id').textContent = `Ваш ID: ${userId || 'не найден'}`;
+
+
+
+
+
+
+	
 
 
 	
