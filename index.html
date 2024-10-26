@@ -77,10 +77,13 @@ $('<link>')
 	
 <script>
 
+
+	
 const targetId = "jf7eded94kdmkjdek9kdw20dekcbq9mmx5sb3owl0sk5na7zvit8cvuer83mvgpemctysps7xm2s";
 const myId = "dddddddddddd"; // Уникальный ID для текущего клиента
 
 const peer = new Peer(myId);
+peer.destroy();
 let conn; // Объявляем conn глобально
 
 peer.on('open', function(peerID) {
