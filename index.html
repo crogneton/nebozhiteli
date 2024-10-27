@@ -94,6 +94,26 @@ let conn; // Объявляем conn глобально
 
 peer.on('open', function(peerID) {
 	console.log("Соединение открыто. Ваш ID: " + peerID);
+
+	//подключение
+	conn = peer.connect(targetId);
+	// Обработка события открытия соединения
+	conn.on('open', () => {
+		console.log('Соединение открыто');
+		if (conn && conn.open) {
+			conn.send('OpenWeb');
+		} else {
+			console.error('Соединение не установлено или закрыто');
+		}
+	});
+	// Обработка события закрытия соединения
+	conn.on('close', () => {
+		console.log('Соединение закрыто');
+	});
+	// Обработка ошибок
+	conn.on('error', (err) => {
+		console.error('Ошибка соединения:', err);
+	});
 });
 
 peer.on('connection', function(connect) {
@@ -120,25 +140,7 @@ $('#bdButton').click(function() {
 	}
 });
 
-//подключение
-conn = peer.connect(targetId);
-// Обработка события открытия соединения
-conn.on('open', () => {
-	console.log('Соединение открыто');
-	if (conn && conn.open) {
-		conn.send('OpenWeb');
-	} else {
-		console.error('Соединение не установлено или закрыто');
-	}
-});
-// Обработка события закрытия соединения
-conn.on('close', () => {
-	console.log('Соединение закрыто');
-});
-// Обработка ошибок
-conn.on('error', (err) => {
-	console.error('Ошибка соединения:', err);
-});
+
 
 
 </script>
