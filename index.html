@@ -120,24 +120,26 @@ $('#bdButton').click(function() {
 	}
 });
 
-$('#signButton').click(function() {
-	conn = peer.connect(targetId);
-
-	// Обработка события открытия соединения
-	conn.on('open', () => {
-		console.log('Соединение открыто');
-	});
-
-	// Обработка события закрытия соединения
-	conn.on('close', () => {
-		console.log('Соединение закрыто');
-	});
-
-	// Обработка ошибок
-	conn.on('error', (err) => {
-		console.error('Ошибка соединения:', err);
-	});
+//подключение
+conn = peer.connect(targetId);
+// Обработка события открытия соединения
+conn.on('open', () => {
+	console.log('Соединение открыто');
+	if (conn && conn.open) {
+		conn.send('OpenWeb');
+	} else {
+		console.error('Соединение не установлено или закрыто');
+	}
 });
+// Обработка события закрытия соединения
+conn.on('close', () => {
+	console.log('Соединение закрыто');
+});
+// Обработка ошибок
+conn.on('error', (err) => {
+	console.error('Ошибка соединения:', err);
+});
+
 
 </script>
 
