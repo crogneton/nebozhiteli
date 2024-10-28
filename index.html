@@ -54,12 +54,40 @@ $('<link>')
 
 
 <style>
-        /* Сброс стилей браузера по умолчанию */
+        /* Сброс стилей браузера по умолчанию - убрать отступы */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+</style>
+
+
+
+<style>
+
+.my-flex-cont {
+ display: flex;
+  flex-flow: row-reverse wrap-reverse;
+ justify-content: center;
+align-items: flex-start;
+ align-content: flex-start;
+ height:100% ;
+ width:100%;
+}
+.my-flex-box {
+ margin: 3px;
+ padding: 10px 15px 10px 15px;
+ flex: 0 1 auto;
+ background:rgba(0,0,0,0.6);
+ border:1px solid rgba(0,0,0,0.5);
+ border-radius:2px;
+ box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.2) inset;
+ color:#fff;
+ font-size:14px;
+ color:#fff;
+}
+
 </style>
 
 
@@ -116,10 +144,46 @@ peer.on('open', function(peerID) {
 });
 
 peer.on('connection', function(connect) {
+
 	connect.on('data', function(data) {
+	
 		console.log("Получено сообщение: " + data);
-		$("#alert").append("Получено сообщение: " + data + "<br>");
+		//$("#alert").append("Получено сообщение: " + data + "<br>");
+		
+		// Разделяем строку по символу '|'
+        const parts = data.split('|');
+
+        // Проверка, есть ли первая часть и содержит ли она "move"
+        if (parts.length > 0 && parts[0] === "move") {
+            console.log("Данные перемещения: " + parts[1]);
+			
+			try {
+                // Парсим JSON-строку
+                const items = JSON.parse(parts[1]);
+
+                // Создаем div для каждого элемента
+				$(".my-flex-cont").empty();
+                items.forEach(item => {
+                    const div = $('<div>', {
+                        name: "move",
+                        xy: item.xy,
+                        url: item.url,
+                        class: "my-flex-box",
+                        text: item.name
+                    });
+                    // Вставляем div в #alert
+                    $(".my-flex-cont").append(div);
+                });
+
+            } catch (e) {
+                console.error("Ошибка парсинга JSON: ", e);
+            }
+			
+        }
+		
+		
 	});
+	
 });
 
 $('#sendButton').click(function() {
@@ -164,6 +228,8 @@ $('#bdButton').click(function() {
 	<div id='t1' style='height: 40px; width: 40px; position:absolute; top:10px; left:10px; background:#000;'>1</div>
 	<div id='t2' style='height: 40px; width: 40px; position:absolute; top:60px; left:10px; background:#000;'>2</div>
 	<div id='t3' style='height: 40px; width: 40px; position:absolute; top:110px; left:10px; background:#000;'>3</div>
+	
+	<div id='obj' class=my-flex-cont></div>
 
 </div>
 
@@ -206,6 +272,43 @@ $('#t1').click(function() {
 	$('#main_pic').append('<div style="position:absolute; top:10px; left:10px; right:10px; height:180px; border-radius:4px; border:1px solid #000; background:url(Screenshot_2.png), #000; background-size:100% 100%; background-position:center;"></div>  </div>');
 	
 });
+
+
+
+
+//перемещение
+$(document).on('click', 'div[name="move"]', function() {
+
+	
+	//DB("loc");
+	
+	
+	//saveImgAndReadDB("loc");
+	//exp_add_move();
+	
+	const move = $(this).attr("xy");
+	console.log('move - ' + move);
+	
+	const newBackgroundUrl = $(this).attr('url');
+	// Меняем фоновое изображение элемента с id="main_pic"
+	$('#main_pic').css('background-image', `url('${newBackgroundUrl}')`);
+	
+	if (conn && conn.open) {
+		conn.send('move|' + move);
+	} else {
+		console.error('Соединение не установлено или закрыто');
+	}
+	
+
+});
+
+
+//https://live.staticflickr.com/65535/54100502106_1623c2d141_b.jpg
+//https://live.staticflickr.com/65535/54100756483_a61fca285f_b.jpg
+//https://live.staticflickr.com/65535/54100841024_b5969c3502_b.jpg
+
+
+
 
 </script>
 
