@@ -25,17 +25,7 @@
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
 
-<!-- Для теста во время разработки чтобы стили не кешировались. -->
-<!-- Использовать <link rel="stylesheet" type="text/css" href="style.css"> -->
-<script>
-var cssFile = 'style.css';
-var version = new Date().getTime(); // Используем текущее время как версию
-$('<link>')
-	.attr('rel', 'stylesheet')
-	.attr('type', 'text/css')
-	.attr('href', cssFile + '?v=' + version)
-	.appendTo('head');
-</script>
+
 
 
 <style>
