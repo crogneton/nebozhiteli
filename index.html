@@ -12,6 +12,7 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Pangolin">
 
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 	window.Telegram.WebApp.ready();
@@ -85,7 +86,12 @@ align-items: flex-start;
 <body>
 <center>
 
+<script>
+// Отправляет событие инициализации нативному клиенту
+vkBridge.send('VKWebAppInit');
+</script>
 
+	
 <div style="display:none;">
 
 	<button id="sendButton">Сообение</button>
